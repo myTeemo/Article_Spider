@@ -70,6 +70,7 @@ ITEM_PIPELINES = {
    # 'Article_Spider.pipelines.JsonWithEncodingPipeline': 2,
    # 'Article_Spider.pipelines.JsonExporterPipeline': 2,
    'Article_Spider.pipelines.ArticleSpiderPipeline': 300,
+   'Article_Spider.pipelines.MysqlPipeline': 2,
 }
 
 IMAGES_URLS_FIELD = 'front_image_url'
