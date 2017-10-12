@@ -66,17 +66,16 @@ class MysqlTwistedPipeline(object):
         query = self.dbpool.runInteraction(self.do_insert, item)
         query.addErrback(self.handle_error)
 
-        # return item
-
     def do_insert(self, cursor, item):
-        insert_sql = """
-                   insert into article_details(title, create_date, url, url_object_id, front_image_url, front_image_path,
-                                               comment_nums, fav_nums, praise_nums, tags, content)
-                                               values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-               """
-        cursor.execute(insert_sql, (item['title'], item['create_date'], item['url'], item['url_object_id'],
-                                         item['front_image_url'][0], item['front_image_path'], item['comment_nums'],
-                                         item['fav_nums'], item['praise_nums'], item['tags'], item['content']))
+        if item['front_image_path']:
+            insert_sql = """
+                       insert into article_details(title, create_date, url, url_object_id, front_image_url, front_image_path,
+                                                   comment_nums, fav_nums, praise_nums, tags, content)
+                                                   values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                   """
+            cursor.execute(insert_sql, (item['title'], item['create_date'], item['url'], item['url_object_id'],
+                                             item['front_image_url'][0], item['front_image_path'], item['comment_nums'],
+                                             item['fav_nums'], item['praise_nums'], item['tags'], item['content']))
 
     def handle_error(self, failure):
         print(failure)
@@ -99,9 +98,12 @@ class JsonExporterPipeline(object):
 
 class ArticleImagePipeline(ImagesPipeline):
     def item_completed(self, results, item, info):
-        for ok, value in results:
-            image_file_path = value['path']
+        if 'front_image_url' in item:
+            for ok, value in results:
+                image_file_path = value['path']
 
-        item['front_image_path'] = image_file_path
+            item['front_image_path'] = image_file_path
+        else:
+            item['front_image_path'] = ''
 
         return item
